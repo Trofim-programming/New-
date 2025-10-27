@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости+ - Современные новости онлайн</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent: #06d6a0;
+            --accent-hover: #05c38f;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Manrope', 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .admin-btn {
+            background: var(--accent);
+            color: var(--bg-dark);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .admin-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .filter-btn:hover:not(.active) {
+            background: var(--bg-card-hover);
+        }
+        
+        /* News Grid */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .news-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary-light);
+        }
+        
+        .card-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-category {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+        
+        .card-excerpt {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+        
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .card-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* News Detail Modal */
+        .news-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+        
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .modal-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .modal-body {
+            padding: 1rem 2rem 2rem;
+        }
+        
+        .modal-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .modal-content-text {
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+        
+        .modal-content-text p {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid var(--border);
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .admin-news-list {
+            margin-top: 2rem;
+        }
+        
+        .news-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: var(--bg-dark);
+        }
+        
+        .news-item-info h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .news-item-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .news-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .contacts {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        
+        .contacts a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .contacts a:hover {
+            color: var(--primary-light);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .news-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .admin-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .filters {
+                justify-content: flex-start;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+            }
+            
+            .modal-header, .modal-body {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero {
+                padding: 2rem 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* AI Processing Indicator */
+        .ai-processing {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .ai-processing i {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">Н+</div>
+                <span>Новости+</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active"><i class="fas fa-home"></i> Главная</a>
+                <a href="#" class="nav-link"><i class="fas fa-newspaper"></i> Все новости</a>
+                <a href="#" class="nav-link"><i class="fas fa-star"></i> Избранное</a>
+                <button class="admin-btn" id="adminToggle"><i class="fas fa-cog"></i> Админ-панель</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Современные новости для вас</h1>
+            <p>Самые свежие и интересные новости, обработанные нейросетью для лучшего восприятия</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Последние новости</h2>
+            <div class="filters">
+                <button class="filter-btn active">Все</button>
+                <button class="filter-btn">Политика</button>
+                <button class="filter-btn">Экономика</button>
+                <button class="filter-btn">Технологии</button>
+                <button class="filter-btn">Спорт</button>
+                <button class="filter-btn">Культура</button>
+            </div>
+        </div>
+
+        <!-- News Grid -->
+        <div class="news-grid" id="newsGrid">
+            <!-- News cards will be dynamically inserted here -->
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="adminPanel">
+            <div class="admin-header">
+                <h2 class="section-title">Административная панель</h2>
+                <button class="btn btn-secondary" id="closeAdminPanel">
+                    <i class="fas fa-times"></i> Закрыть
+                </button>
+            </div>
+            
+            <div class="admin-form">
+                <div class="form-group">
+                    <label class="form-label">Заголовок новости</label>
+                    <input type="text" class="form-input" id="newsTitle" placeholder="Введите заголовок">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Категория</label>
+                    <select class="form-select" id="newsCategory">
+                        <option value="politics">Политика</option>
+                        <option value="economics">Экономика</option>
+                        <option value="technology">Технологии</option>
+                        <option value="sports">Спорт</option>
+                        <option value="culture">Культура</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">URL изображения</label>
+                    <input type="text" class="form-input" id="newsImage" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">Текст новости</label>
+                    <textarea class="form-textarea" id="newsContent" placeholder="Введите текст новости"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="clearForm">
+                    <i class="fas fa-broom"></i> Очистить
+                </button>
+                <button class="btn btn-primary" id="addNews">
+                    <i class="fas fa-plus"></i> Добавить новость
+                </button>
+            </div>
+            
+            <div class="admin-news-list">
+                <h3>Управление новостями</h3>
+                <div id="adminNewsList">
+                    <!-- Admin news list will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Detail Modal -->
+    <div class="news-modal" id="newsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalNewsTitle">Заголовок новости</h2>
+                <button class="close-modal" id="closeNewsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img id="modalNewsImage" src="" alt="" class="modal-image">
+                <div class="modal-meta">
+                    <span id="modalNewsCategory">Категория</span>
+                    <span id="modalNewsDate">Дата</span>
+                    <span id="modalNewsSource">Источник</span>
+                </div>
+                <div class="modal-content-text" id="modalNewsContent">
+                    Содержимое новости...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Вход в админ-панель</h3>
+                <button class="close-modal" id="closeLoginModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="adminEmail" placeholder="Введите email">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+                <input type="password" class="form-input" id="adminPassword" placeholder="Введите пароль">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" id="loginAdmin">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>© 2023 Новости+. Все права защищены.</p>
+            <p>Современная платформа для чтения новостей</p>
+            <div class="contacts">
+                <p>Свяжитесь с нами: <a href="https://t.me/plus_novosty" target="_blank">@plus_novosty</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Конфигурация
+        const ADMIN_CREDENTIALS = {
+            email: 'trofimzivilik14@gmail.com',
+            password: 'Trofim2014'
+        };
+
+        // Состояние приложения
+        const state = {
+            news: [],
+            filteredNews: [],
+            currentFilter: 'all',
+            isAdmin: false,
+            adminNews: JSON.parse(localStorage.getItem('adminNews')) || [],
+            currentNewsItem: null
+        };
+
+        // DOM элементы
+        const elements = {
+            newsGrid: document.getElementById('newsGrid'),
+            adminPanel: document.getElementById('adminPanel'),
+            adminToggle: document.getElementById('adminToggle'),
+            closeAdminPanel: document.getElementById('closeAdminPanel'),
+            loginModal: document.getElementById('loginModal'),
+            closeLoginModal: document.getElementById('closeLoginModal'),
+            loginAdmin: document.getElementById('loginAdmin'),
+            adminEmail: document.getElementById('adminEmail'),
+            adminPassword: document.getElementById('adminPassword'),
+            addNews: document.getElementById('addNews'),
+            clearForm: document.getElementById('clearForm'),
+            adminNewsList: document.getElementById('adminNewsList'),
+            newsTitle: document.getElementById('newsTitle'),
+            newsCategory: document.getElementById('newsCategory'),
+            newsImage: document.getElementById('newsImage'),
+            newsContent: document.getElementById('newsContent'),
+            filterButtons: document.querySelectorAll('.filter-btn'),
+            newsModal: document.getElementById('newsModal'),
+            closeNewsModal: document.getElementById('closeNewsModal'),
+            modalNewsTitle: document.getElementById('modalNewsTitle'),
+            modalNewsImage: document.getElementById('modalNewsImage'),
+            modalNewsCategory: document.getElementById('modalNewsCategory'),
+            modalNewsDate: document.getElementById('modalNewsDate'),
+            modalNewsSource: document.getElementById('modalNewsSource'),
+            modalNewsContent: document.getElementById('modalNewsContent')
+        };
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNews();
+            setupEventListeners();
+        });
+
+        // Загрузка новостей
+        function loadNews() {
+            // Показываем только новости из админ-панели
+            state.news = [];
+            state.filteredNews = [...state.adminNews];
+            renderNews();
+        }
+
+        // Отрисовка новостей
+        function renderNews() {
+            if (state.filteredNews.length === 0) {
+                elements.newsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                        <i class="fas fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>Новостей пока нет</h3>
+                        <p>Добавьте первую новость через админ-панель</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elements.newsGrid.innerHTML = state.filteredNews.map(news => `
+                <div class="news-card" data-id="${news.id}">
+                    <img src="${news.image}" alt="${news.title}" class="card-image">
+                    <div class="card-content">
+                        <span class="card-category">${getCategoryName(news.category)}</span>
+                        <h3 class="card-title">${news.title}</h3>
+                        <p class="card-excerpt">${news.excerpt}</p>
+                        <div class="card-meta">
+                            <div class="card-date">
+                                <i class="far fa-clock"></i> ${news.date}
+                            </div>
+                            <div>${news.source}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Добавляем обработчики событий для карточек новостей
+            document.querySelectorAll('.news-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const newsId = parseInt(card.getAttribute('data-id'));
+                    openNewsDetail(newsId);
+                });
+            });
+        }
+
+        // Открытие детальной страницы новости
+        function openNewsDetail(newsId) {
+            const newsItem = state.adminNews.find(item => item.id === newsId);
+            if (!newsItem) return;
+            
+            state.currentNewsItem = newsItem;
+            
+            // Заполняем модальное окно данными новости
+            elements.modalNewsTitle.textContent = newsItem.title;
+            elements.modalNewsImage.src = newsItem.image;
+            elements.modalNewsImage.alt = newsItem.title;
+            elements.modalNewsCategory.textContent = getCategoryName(newsItem.category);
+            elements.modalNewsDate.textContent = newsItem.date;
+            elements.modalNewsSource.textContent = newsItem.source;
+            elements.modalNewsContent.innerHTML = `<p>${newsItem.content}</p>`;
+            
+            // Показываем модальное окно
+            elements.newsModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Закрытие модального окна новости
+        function closeNewsModal() {
+            elements.newsModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            state.currentNewsItem = null;
+        }
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Фильтры новостей
+            elements.filterButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const filter = e.target.textContent.toLowerCase();
+                    
+                    // Обновляем активную кнопку
+                    elements.filterButtons.forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // Фильтруем новости
+                    if (filter === 'все') {
+                        state.filteredNews = [...state.adminNews];
+                    } else {
+                        const category = getCategoryKey(filter);
+                        state.filteredNews = state.adminNews.filter(
+                            news => news.category === category
+                        );
+                    }
+                    
+                    renderNews();
+                });
+            });
+
+            // Админ-панель
+            elements.adminToggle.addEventListener('click', () => {
+                if (state.isAdmin) {
+                    elements.adminPanel.style.display = 'block';
+                } else {
+                    elements.loginModal.style.display = 'flex';
+                }
+            });
+
+            elements.closeAdminPanel.addEventListener('click', () => {
+                elements.adminPanel.style.display = 'none';
+            });
+
+            elements.closeLoginModal.addEventListener('click', () => {
+                elements.loginModal.style.display = 'none';
+            });
+
+            // Закрытие модального окна новости
+            elements.closeNewsModal.addEventListener('click', closeNewsModal);
+            elements.newsModal.addEventListener('click', (e) => {
+                if (e.target === elements.newsModal) {
+                    closeNewsModal();
+                }
+            });
+
+            // Авторизация
+            elements.loginAdmin.addEventListener('click', () => {
+                const email = elements.adminEmail.value;
+                const password = elements.adminPassword.value;
+                
+                if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                    state.isAdmin = true;
+                    elements.loginModal.style.display = 'none';
+                    elements.adminPanel.style.display = 'block';
+                    renderAdminNewsList();
+                    showNotification('Успешный вход в админ-панель', 'success');
+                } else {
+                    showNotification('Неверный email или пароль', 'error');
+                }
+            });
+
+            // Добавление новости
+            elements.addNews.addEventListener('click', async () => {
+                const title = elements.newsTitle.value.trim();
+                const category = elements.newsCategory.value;
+                const image = elements.newsImage.value.trim();
+                const content = elements.newsContent.value.trim();
+                
+                if (!title || !content) {
+                    showNotification('Заполните обязательные поля', 'error');
+                    return;
+                }
+                
+                // Показываем индикатор обработки
+                elements.addNews.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Добавление...';
+                elements.addNews.disabled = true;
+                
+                try {
+                    const newNews = {
+                        id: Date.now(),
+                        title,
+                        excerpt: content.substring(0, 150) + '...',
+                        category,
+                        image: image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+                        date: new Date().toLocaleDateString('ru-RU'),
+                        source: 'Админ',
+                        content: content
+                    };
+                    
+                    state.adminNews.push(newNews);
+                    localStorage.setItem('adminNews', JSON.stringify(state.adminNews));
+                    
+                    // Обновляем отображение
+                    renderAdminNewsList();
+                    clearAdminForm();
+                    
+                    // Обновляем основную сетку новостей, если активен соответствующий фильтр
+                    if (state.currentFilter === 'all' || state.currentFilter === category) {
+                        state.filteredNews = [...state.adminNews];
+                        renderNews();
+                    }
+                    
+                    showNotification('Новость успешно добавлена', 'success');
+                } catch (error) {
+                    showNotification('Ошибка при добавлении новости', 'error');
+                } finally {
+                    elements.addNews.innerHTML = '<i class="fas fa-plus"></i> Добавить новость';
+                    elements.addNews.disabled = false;
+                }
+            });
+
+            // Очистка формы
+            elements.clearForm.addEventListener('click', clearAdminForm);
+        }
+
+        // Очистка формы админ-панели
+        function clearAdminForm() {
+            elements.newsTitle.value = '';
+            elements.newsCategory.value = 'politics';
+            elements.newsImage.value = '';
+            elements.newsContent.value = '';
+        }
+
+        // Отрисовка списка новостей в админ-панели
+        function renderAdminNewsList() {
+            if (state.adminNews.length === 0) {
+                elements.adminNewsList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>Нет добавленных новостей</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elements.adminNewsList.innerHTML = state.adminNews.map(news => `
+                <div class="news-item">
+                    <div class="news-item-info">
+                        <h3>${news.title}</h3>
+                        <div class="news-item-meta">
+                            <span>${getCategoryName(news.category)}</span>
+                            <span>${news.date}</span>
+                        </div>
+                    </div>
+                    <div class="news-item-actions">
+                        <button class="btn btn-danger" onclick="deleteNews(${news.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Удаление новости
+        function deleteNews(id) {
+            if (confirm('Вы уверены, что хотите удалить эту новость?')) {
+                state.adminNews = state.adminNews.filter(news => news.id !== id);
+                localStorage.setItem('adminNews', JSON.stringify(state.adminNews));
+                renderAdminNewsList();
+                
+                // Обновляем основную сетку новостей
+                state.filteredNews = state.filteredNews.filter(news => news.id !== id);
+                renderNews();
+                
+                showNotification('Новость удалена', 'success');
+            }
+        }
+
+        // Вспомогательные функции
+        function getCategoryName(category) {
+            const categories = {
+                politics: 'Политика',
+                economics: 'Экономика',
+                technology: 'Технологии',
+                sports: 'Спорт',
+                culture: 'Культура'
+            };
+            return categories[category] || 'Общее';
+        }
+
+        function getCategoryKey(name) {
+            const categories = {
+                'политика': 'politics',
+                'экономика': 'economics',
+                'технологии': 'technology',
+                'спорт': 'sports',
+                'культура': 'culture'
+            };
+            return categories[name] || 'all';
+        }
+
+        function showNotification(message, type) {
+            // В реальном приложении здесь можно добавить красивую систему уведомлений
+            alert(`${type === 'success' ? '✓' : '✗'} ${message}`);
+        }
+
+        // Делаем функции глобальными для использования в inline обработчиках
+        window.deleteNews = deleteNews;
+    </script>
+</body>
+</html>
