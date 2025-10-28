@@ -39,6 +39,8 @@
             --header-height: 70px;
             --safe-area-inset-top: env(safe-area-inset-top, 0px);
             --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-inset-left: env(safe-area-inset-left, 0px);
+            --safe-area-inset-right: env(safe-area-inset-right, 0px);
         }
         
         * {
@@ -49,6 +51,7 @@
         
         html {
             scroll-behavior: smooth;
+            height: 100%;
         }
         
         body {
@@ -58,7 +61,11 @@
             line-height: 1.6;
             overflow-x: hidden;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             padding-top: var(--safe-area-inset-top);
+            padding-left: var(--safe-area-inset-left);
+            padding-right: var(--safe-area-inset-right);
         }
         
         /* Оптимизация рендеринга */
@@ -80,6 +87,8 @@
             padding: 0.75rem 1rem;
             height: var(--header-height);
             padding-top: calc(0.75rem + var(--safe-area-inset-top));
+            padding-left: calc(1rem + var(--safe-area-inset-left));
+            padding-right: calc(1rem + var(--safe-area-inset-right));
         }
         
         .header-container {
@@ -201,6 +210,8 @@
             border-bottom: 1px solid var(--border);
             padding: 1rem;
             z-index: 999;
+            padding-left: var(--safe-area-inset-left);
+            padding-right: var(--safe-area-inset-right);
         }
         
         .mobile-nav.active {
@@ -223,6 +234,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding-left: calc(1rem + var(--safe-area-inset-left));
+            padding-right: calc(1rem + var(--safe-area-inset-right));
         }
         
         .hero-content {
@@ -252,6 +265,9 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: clamp(1rem, 3vw, 2rem);
+            padding-left: calc(clamp(1rem, 3vw, 2rem) + var(--safe-area-inset-left));
+            padding-right: calc(clamp(1rem, 3vw, 2rem) + var(--safe-area-inset-right));
+            flex: 1;
         }
         
         .section-header {
@@ -409,6 +425,8 @@
             padding: 1rem;
             padding-top: calc(1rem + var(--safe-area-inset-top));
             padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
+            padding-left: calc(1rem + var(--safe-area-inset-left));
+            padding-right: calc(1rem + var(--safe-area-inset-right));
         }
         
         .modal-content {
@@ -651,6 +669,8 @@
             padding: 1rem;
             padding-top: calc(1rem + var(--safe-area-inset-top));
             padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
+            padding-left: calc(1rem + var(--safe-area-inset-left));
+            padding-right: calc(1rem + var(--safe-area-inset-right));
         }
         
         .modal-content-small {
@@ -691,6 +711,8 @@
             text-align: center;
             color: var(--text-muted);
             margin-top: auto;
+            padding-left: calc(1rem + var(--safe-area-inset-left));
+            padding-right: calc(1rem + var(--safe-area-inset-right));
         }
         
         .footer-content {
@@ -793,6 +815,20 @@
             .news-card:active {
                 transform: scale(0.98);
             }
+            
+            /* Увеличиваем область клика для мобильных устройств */
+            .filter-btn, .btn, .admin-btn, .logout-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .nav-link {
+                padding: 8px 0;
+            }
+            
+            .mobile-nav-links .nav-link {
+                padding: 12px 0;
+            }
         }
         
         /* Адаптивные медиа-запросы */
@@ -833,10 +869,11 @@
                 margin-left: -1rem;
                 padding-left: 1rem;
                 padding-right: 1rem;
+                scrollbar-width: none; /* Firefox */
             }
             
             .filters::-webkit-scrollbar {
-                display: none;
+                display: none; /* Chrome, Safari, Edge */
             }
             
             .news-item {
@@ -846,6 +883,8 @@
             
             .news-item-actions {
                 align-self: flex-end;
+                width: 100%;
+                justify-content: flex-end;
             }
             
             .form-actions {
@@ -882,6 +921,10 @@
             .news-grid {
                 gap: 1rem;
             }
+            
+            .modal-content-small {
+                padding: 1.5rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -905,10 +948,60 @@
             .form-input, .form-textarea, .form-select {
                 padding: 10px;
             }
+            
+            .news-item-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .news-item-actions .btn {
+                width: 100%;
+            }
+        }
+        
+        /* Очень маленькие экраны */
+        @media (max-width: 360px) {
+            .logo span {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .card-content {
+                padding: 1rem;
+            }
+            
+            .modal-content-small {
+                padding: 1rem;
+            }
         }
         
         /* Высокие экраны */
         @media (min-height: 800px) and (min-width: 1024px) {
+            .hero {
+                min-height: 70vh;
+            }
+        }
+        
+        /* Планшеты в портретной ориентации */
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+            .news-grid {
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+            }
+            
+            .hero {
+                min-height: 50vh;
+            }
+        }
+        
+        /* Планшеты в альбомной ориентации */
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
             .hero {
                 min-height: 70vh;
             }
@@ -930,13 +1023,35 @@
         
         /* Улучшения для печати */
         @media print {
-            .admin-panel, .admin-btn, .mobile-menu-btn, .sync-status {
+            .admin-panel, .admin-btn, .mobile-menu-btn, .sync-status, .filters, .hero {
                 display: none !important;
             }
             
             .news-card {
                 break-inside: avoid;
                 border: 1px solid #000;
+                box-shadow: none;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+        }
+        
+        /* Поддержка ориентации устройства */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .hero {
+                min-height: 80vh;
+            }
+            
+            header {
+                position: relative;
             }
         }
     </style>
