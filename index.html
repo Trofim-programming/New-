@@ -15,6 +15,9 @@
     <!-- Иконки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Parse SDK -->
+    <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+    
     <style>
         :root {
             --primary: #2563eb;
@@ -33,7 +36,6 @@
             --radius: 12px;
             --transition: all 0.3s ease;
             
-            /* Переменные для адаптивности */
             --header-height: 70px;
             --safe-area-inset-top: env(safe-area-inset-top, 0px);
             --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
@@ -156,6 +158,26 @@
         .admin-btn:hover {
             background: var(--accent-hover);
             transform: translateY(-2px);
+        }
+        
+        .logout-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            white-space: nowrap;
+        }
+        
+        .logout-btn:hover {
+            background: var(--primary-dark);
         }
         
         /* Mobile menu */
@@ -791,7 +813,7 @@
                 display: block;
             }
             
-            .nav-links .nav-link:not(.admin-btn) {
+            .nav-links .nav-link:not(.admin-btn):not(.logout-btn) {
                 display: none;
             }
             
@@ -941,6 +963,7 @@
                     <span>Синхронизировано</span>
                 </div>
                 <button class="admin-btn" id="adminToggle"><i class="fas fa-cog"></i> <span class="nav-text">Админ-панель</span></button>
+                <button class="logout-btn" id="logoutBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> <span class="nav-text">Выйти</span></button>
             </div>
         </div>
         
@@ -954,6 +977,8 @@
                     <div class="sync-indicator"></div>
                     <span>Синхронизировано</span>
                 </div>
+                <button class="admin-btn" id="mobileAdminToggle"><i class="fas fa-cog"></i> Админ-панель</button>
+                <button class="logout-btn" id="mobileLogoutBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Выйти</button>
             </div>
         </div>
     </header>
@@ -982,7 +1007,6 @@
 
         <!-- News Grid -->
         <div class="news-grid" id="newsGrid">
-            <!-- News cards will be dynamically inserted here -->
             <div class="loading">
                 <div class="spinner"></div>
             </div>
@@ -992,9 +1016,14 @@
         <div class="admin-panel" id="adminPanel">
             <div class="admin-header">
                 <h2 class="section-title">Административная панель</h2>
-                <button class="btn btn-secondary" id="closeAdminPanel">
-                    <i class="fas fa-times"></i> Закрыть
-                </button>
+                <div>
+                    <button class="btn btn-secondary" id="closeAdminPanel">
+                        <i class="fas fa-times"></i> Закрыть
+                    </button>
+                    <button class="btn logout-btn" id="logoutFromPanel">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </button>
+                </div>
             </div>
             
             <div class="admin-form">
@@ -1070,16 +1099,20 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-input" id="adminEmail" placeholder="Введите email">
+                <input type="email" class="form-input" id="adminEmail" placeholder="email">
             </div>
             <div class="form-group">
                 <label class="form-label">Пароль</label>
-                <input type="password" class="form-input" id="adminPassword" placeholder="Введите пароль">
+                <input type="password" class="form-input" id="adminPassword" placeholder="password">
             </div>
             <div class="form-actions">
                 <button class="btn btn-primary" id="loginAdmin">
                     <i class="fas fa-sign-in-alt"></i> Войти
                 </button>
+            </div>
+            <div style="margin-top: 1rem; text-align: center;">
+                <p style="color: var(--text-muted); font-size: 0.875rem;">
+                    
             </div>
         </div>
     </div>
@@ -1096,17 +1129,9 @@
     </footer>
 
     <script>
-        // Конфигурация
-        const ADMIN_CREDENTIALS = {
-            email: 'trofimzivilik14@gmail.com',
-            password: 'Trofim2014'
-        };
-
-        // API endpoints - замените на реальные URL вашего сервера
-        const API_URLS = {
-            getNews: 'https://trofim-programming.github.io/New-/news.json', // Замените на реальный URL
-            addNews: 'https://trofim-programming.github.io/New-/add-news.php' // Замените на реальный URL
-        };
+        // Конфигурация Back4App Parse
+        Parse.initialize("TllBpzRUnfTo6IhOW6oGUrQ2ubiUyWS555vExzuu", "p4oPbVYAEVdGSXvt0A8zCxakmOH0zxgHYezNatyp");
+        Parse.serverURL = "https://parseapi.back4app.com/";
 
         // Состояние приложения
         const state = {
@@ -1115,7 +1140,8 @@
             currentFilter: 'all',
             isAdmin: false,
             currentNewsItem: null,
-            isMobileMenuOpen: false
+            isMobileMenuOpen: false,
+            currentUser: null
         };
 
         // DOM элементы
@@ -1123,6 +1149,7 @@
             newsGrid: document.getElementById('newsGrid'),
             adminPanel: document.getElementById('adminPanel'),
             adminToggle: document.getElementById('adminToggle'),
+            mobileAdminToggle: document.getElementById('mobileAdminToggle'),
             closeAdminPanel: document.getElementById('closeAdminPanel'),
             loginModal: document.getElementById('loginModal'),
             closeLoginModal: document.getElementById('closeLoginModal'),
@@ -1147,152 +1174,156 @@
             modalNewsContent: document.getElementById('modalNewsContent'),
             syncStatus: document.getElementById('syncStatus'),
             mobileMenuBtn: document.getElementById('mobileMenuBtn'),
-            mobileNav: document.getElementById('mobileNav')
+            mobileNav: document.getElementById('mobileNav'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            mobileLogoutBtn: document.getElementById('mobileLogoutBtn'),
+            logoutFromPanel: document.getElementById('logoutFromPanel')
         };
 
         // Инициализация приложения
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadNews();
+            await ensureAdminExists();
+            await initializeApp();
             setupEventListeners();
             setupPerformanceOptimizations();
             setupMobileMenu();
         });
 
-        // Оптимизации производительности
-        function setupPerformanceOptimizations() {
-            // Отложенная загрузка изображений
-            if ('IntersectionObserver' in window) {
-                const imageObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            if (img.dataset.src) {
-                                img.src = img.dataset.src;
-                                img.classList.remove('loading');
-                                imageObserver.unobserve(img);
-                            }
-                        }
-                    });
-                });
+        // === СОЗДАНИЕ АДМИНИСТРАТОРА (выполняется один раз) ===
+        async function ensureAdminExists() {
+            try {
+                // Проверяем, существует ли пользователь с такой почтой
+                const query = new Parse.Query(Parse.User);
+                query.equalTo("email", "trofimzivilik14@gmail.com");
+                const existingUser = await query.first();
 
-                // Будем использовать для изображений в модальных окнах
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.querySelectorAll('img[data-src]').forEach(img => {
-                        imageObserver.observe(img);
-                    });
-                });
-            }
-
-            // Предотвращение множественных быстрых кликов
-            let lastClickTime = 0;
-            document.addEventListener('click', (e) => {
-                const currentTime = Date.now();
-                if (currentTime - lastClickTime < 300) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                if (existingUser) {
+                    console.log("✅ Админ уже существует:", existingUser.get("username"));
                     return;
                 }
-                lastClickTime = currentTime;
-            }, true);
 
-            // Оптимизация скролла
-            let scrollTimeout;
-            window.addEventListener('scroll', () => {
-                if (scrollTimeout) {
-                    clearTimeout(scrollTimeout);
-                }
-                scrollTimeout = setTimeout(() => {
-                    // Логика, которая должна выполняться после завершения скролла
-                }, 100);
-            });
+                // Создаем нового пользователя
+                const user = new Parse.User();
+                user.set("username", "admin");
+                user.set("email", "trofimzivilik14@gmail.com");
+                user.set("password", "Trofim2014");
+
+                await user.signUp();
+
+                // Добавляем его в класс AdminUsers, чтобы дать права администратора
+                await createAdminUser(user);
+
+                console.log("✅ Администратор успешно создан!");
+            } catch (error) {
+                console.error("❌ Ошибка при создании администратора:", error);
+            }
         }
 
-        // Обработчики для мобильного меню
-        function setupMobileMenu() {
-            elements.mobileMenuBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                state.isMobileMenuOpen = !state.isMobileMenuOpen;
-                elements.mobileNav.classList.toggle('active', state.isMobileMenuOpen);
-                elements.mobileMenuBtn.innerHTML = state.isMobileMenuOpen ? 
-                    '<i class="fas fa-times"></i>' : 
-                    '<i class="fas fa-bars"></i>';
-            });
-
-            // Закрытие меню при клике вне его
-            document.addEventListener('click', (e) => {
-                if (state.isMobileMenuOpen && !elements.mobileNav.contains(e.target) && !elements.mobileMenuBtn.contains(e.target)) {
-                    closeMobileMenu();
+        // Инициализация приложения
+        async function initializeApp() {
+            try {
+                // Проверяем, есть ли текущий пользователь
+                state.currentUser = Parse.User.current();
+                if (state.currentUser) {
+                    // Проверяем права пользователя через базу данных
+                    await checkAdminPermissions();
                 }
-            });
-
-            // Закрытие меню при ресайзе
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768 && state.isMobileMenuOpen) {
-                    closeMobileMenu();
-                }
-            });
-
-            // Закрытие меню при клике на ссылку
-            elements.mobileNav.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A') {
-                    closeMobileMenu();
-                }
-            });
+                
+                await loadNewsFromParse();
+                setupRealtimeUpdates();
+                updateUI();
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showNotification('Ошибка загрузки приложения', 'error');
+            }
         }
 
-        function closeMobileMenu() {
-            state.isMobileMenuOpen = false;
-            elements.mobileNav.classList.remove('active');
-            elements.mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        // Проверка прав администратора через базу данных
+        async function checkAdminPermissions() {
+            try {
+                const AdminUsers = Parse.Object.extend('AdminUsers');
+                const query = new Parse.Query(AdminUsers);
+                query.equalTo('user', state.currentUser);
+                query.equalTo('isActive', true);
+                
+                const adminUser = await query.first();
+                
+                if (adminUser) {
+                    state.isAdmin = true;
+                    console.log('✅ Авторизован как администратор');
+                } else {
+                    state.isAdmin = false;
+                    console.log('❌ Недостаточно прав для доступа к админ-панели');
+                }
+            } catch (error) {
+                console.error('Ошибка проверки прав:', error);
+                state.isAdmin = false;
+            }
         }
 
-        // Загрузка новостей с сервера
-        async function loadNews() {
+        // Создание администратора в базе данных
+        async function createAdminUser(user) {
+            try {
+                const AdminUsers = Parse.Object.extend('AdminUsers');
+                const adminUser = new AdminUsers();
+                
+                await adminUser.save({
+                    user: user,
+                    isActive: true,
+                    role: 'admin',
+                    createdAt: new Date()
+                });
+                
+                return { success: true };
+            } catch (error) {
+                console.error('Ошибка создания администратора:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Загрузка новостей из Parse
+        async function loadNewsFromParse() {
             try {
                 elements.syncStatus.classList.add('syncing');
                 elements.syncStatus.querySelector('span').textContent = 'Загрузка...';
                 
-                // В реальном приложении здесь будет fetch к вашему серверу
-                // const response = await fetch(API_URLS.getNews);
-                // const news = await response.json();
+                const News = Parse.Object.extend('News');
+                const query = new Parse.Query(News);
+                query.descending('createdAt');
+                query.limit(100);
                 
-                // Имитация загрузки с сервера
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                const results = await query.find();
                 
-                // Получаем новости из localStorage (временное решение)
-                const savedNews = JSON.parse(localStorage.getItem('server_news')) || [];
+                state.news = results.map(news => ({
+                    id: news.id,
+                    title: news.get('title'),
+                    excerpt: news.get('excerpt') || news.get('content').substring(0, 150) + '...',
+                    category: news.get('category'),
+                    image: news.get('image'),
+                    source: news.get('source'),
+                    content: news.get('content'),
+                    createdAt: news.get('createdAt'),
+                    updatedAt: news.get('updatedAt')
+                }));
                 
-                // Если нет сохраненных новостей, создаем демо-данные
-                if (savedNews.length === 0) {
-                    state.news = getDemoNews();
-                } else {
-                    state.news = savedNews;
-                }
-                
-                state.filteredNews = state.news;
-                
+                state.filteredNews = [...state.news];
                 renderNews();
                 
                 elements.syncStatus.classList.remove('syncing');
                 elements.syncStatus.querySelector('span').textContent = 'Синхронизировано';
+                
             } catch (error) {
                 console.error('Ошибка загрузки новостей:', error);
-                showNotification('Ошибка загрузки новостей', 'error');
-                
                 elements.syncStatus.querySelector('span').textContent = 'Ошибка синхронизации';
-                
-                // Загружаем демо-новости в случае ошибки
-                state.news = getDemoNews();
-                state.filteredNews = state.news;
-                renderNews();
+                loadDemoNews();
             }
         }
 
-        // Демо-новости для первоначального отображения
-        function getDemoNews() {
-            return [
+        // Загрузка демо-новостей
+        function loadDemoNews() {
+            state.news = [
                 {
-                    id: 1,
+                    id: '1',
                     title: "Новые технологии в веб-разработке",
                     excerpt: "Современные фреймворки и инструменты делают разработку быстрее и эффективнее...",
                     category: "technology",
@@ -1300,50 +1331,103 @@
                     date: new Date().toLocaleDateString('ru-RU'),
                     source: "ТехноНовости",
                     content: "Современные фреймворки и инструменты делают разработку быстрее и эффективнее. В 2023 году мы видим рост популярности таких технологий как React, Vue.js и новых подходов к разработке интерфейсов."
-                },
-                {
-                    id: 2,
-                    title: "Изменения в экономической политике",
-                    excerpt: "Правительство объявило о новых мерах поддержки бизнеса в условиях текущей экономической ситуации...",
-                    category: "economics",
-                    image: "https://images.unsplash.com/photo-1665686374006-b8f04cf62d57?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-                    date: new Date(Date.now() - 86400000).toLocaleDateString('ru-RU'),
-                    source: "Экономика сегодня",
-                    content: "Правительство объявило о новых мерах поддержки бизнеса в условиях текущей экономической ситуации. Основные изменения касаются налоговых льгот для малого и среднего бизнеса."
-                },
-                {
-                    id: 3,
-                    title: "Международные спортивные соревнования",
-                    excerpt: "В столице прошли международные соревнования по легкой атлетике с участием спортсменов из 50 стран...",
-                    category: "sports",
-                    image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-                    date: new Date(Date.now() - 172800000).toLocaleDateString('ru-RU'),
-                    source: "СпортЭкспресс",
-                    content: "В столице прошли международные соревнования по легкой атлетике с участием спортсменов из 50 стран. Российские атлеты показали выдающиеся результаты в нескольких дисциплинах."
                 }
             ];
+            state.filteredNews = [...state.news];
+            renderNews();
         }
 
-        // Сохранение новостей на сервер
-        async function saveNewsToServer(news) {
+        // Настройка реального времени обновлений
+        function setupRealtimeUpdates() {
+            setInterval(async () => {
+                try {
+                    await loadNewsFromParse();
+                } catch (error) {
+                    console.error('Ошибка обновления новостей:', error);
+                }
+            }, 30000);
+        }
+
+        // Сохранение новости в Parse
+        async function saveNewsToParse(news) {
             try {
-                // В реальном приложении здесь будет fetch к вашему серверу
-                // const response = await fetch(API_URLS.addNews, {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(news)
-                // });
+                const News = Parse.Object.extend('News');
+                const newsObject = new News();
                 
-                // Имитация сохранения на сервер
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const result = await newsObject.save({
+                    title: news.title,
+                    excerpt: news.excerpt,
+                    category: news.category,
+                    image: news.image,
+                    source: news.source,
+                    content: news.content,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
                 
-                // Временное решение - сохраняем в localStorage
-                localStorage.setItem('server_news', JSON.stringify(news));
-                
-                return true;
+                return { success: true, id: result.id };
             } catch (error) {
-                console.error('Ошибка сохранения:', error);
-                return false;
+                console.error('Ошибка сохранения новости:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Удаление новости из Parse
+        async function deleteNewsFromParse(newsId) {
+            try {
+                const News = Parse.Object.extend('News');
+                const query = new Parse.Query(News);
+                const newsObject = await query.get(newsId);
+                
+                await newsObject.destroy();
+                return { success: true };
+            } catch (error) {
+                console.error('Ошибка удаления новости:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Вход пользователя
+        async function loginUser(email, password) {
+            try {
+                const user = await Parse.User.logIn(email, password);
+                state.currentUser = user;
+                
+                // Проверяем права администратора
+                await checkAdminPermissions();
+                
+                return { success: true };
+            } catch (error) {
+                console.error('Ошибка входа:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Выход пользователя
+        async function logoutUser() {
+            try {
+                await Parse.User.logOut();
+                state.currentUser = null;
+                state.isAdmin = false;
+                return { success: true };
+            } catch (error) {
+                console.error('Ошибка выхода:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            if (state.currentUser) {
+                elements.logoutBtn.style.display = 'flex';
+                elements.mobileLogoutBtn.style.display = 'flex';
+                elements.adminToggle.querySelector('.nav-text').textContent = `Админ (${state.currentUser.get('username') || state.currentUser.get('email')})`;
+                elements.mobileAdminToggle.innerHTML = `<i class="fas fa-cog"></i> Админ (${state.currentUser.get('username') || state.currentUser.get('email')})`;
+            } else {
+                elements.logoutBtn.style.display = 'none';
+                elements.mobileLogoutBtn.style.display = 'none';
+                elements.adminToggle.querySelector('.nav-text').textContent = 'Админ-панель';
+                elements.mobileAdminToggle.innerHTML = '<i class="fas fa-cog"></i> Админ-панель';
             }
         }
 
@@ -1369,7 +1453,7 @@
                         <p class="card-excerpt">${news.excerpt}</p>
                         <div class="card-meta">
                             <div class="card-date">
-                                <i class="far fa-clock"></i> ${news.date}
+                                <i class="far fa-clock"></i> ${formatDate(news.createdAt)}
                             </div>
                             <div>${news.source}</div>
                         </div>
@@ -1377,10 +1461,9 @@
                 </div>
             `).join('');
             
-            // Добавляем обработчики событий для карточек новостей
             document.querySelectorAll('.news-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    const newsId = parseInt(card.getAttribute('data-id'));
+                    const newsId = card.getAttribute('data-id');
                     openNewsDetail(newsId);
                 });
             });
@@ -1393,16 +1476,14 @@
             
             state.currentNewsItem = newsItem;
             
-            // Заполняем модальное окно данными новости
             elements.modalNewsTitle.textContent = newsItem.title;
             elements.modalNewsImage.src = newsItem.image;
             elements.modalNewsImage.alt = newsItem.title;
             elements.modalNewsCategory.textContent = getCategoryName(newsItem.category);
-            elements.modalNewsDate.textContent = newsItem.date;
+            elements.modalNewsDate.textContent = formatDate(newsItem.createdAt);
             elements.modalNewsSource.textContent = newsItem.source;
             elements.modalNewsContent.innerHTML = `<p>${newsItem.content}</p>`;
             
-            // Показываем модальное окно
             elements.newsModal.style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
@@ -1421,11 +1502,9 @@
                 button.addEventListener('click', (e) => {
                     const filter = e.target.textContent.toLowerCase();
                     
-                    // Обновляем активную кнопку
                     elements.filterButtons.forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
                     
-                    // Фильтруем новости
                     if (filter === 'все') {
                         state.filteredNews = [...state.news];
                     } else {
@@ -1441,11 +1520,22 @@
 
             // Админ-панель
             elements.adminToggle.addEventListener('click', () => {
-                if (state.isAdmin) {
+                if (state.currentUser && state.isAdmin) {
                     elements.adminPanel.style.display = 'block';
                     renderAdminNewsList();
                 } else {
                     elements.loginModal.style.display = 'flex';
+                }
+            });
+
+            elements.mobileAdminToggle.addEventListener('click', () => {
+                if (state.currentUser && state.isAdmin) {
+                    elements.adminPanel.style.display = 'block';
+                    renderAdminNewsList();
+                    closeMobileMenu();
+                } else {
+                    elements.loginModal.style.display = 'flex';
+                    closeMobileMenu();
                 }
             });
 
@@ -1457,7 +1547,7 @@
                 elements.loginModal.style.display = 'none';
             });
 
-            // Закрытие модального окна новости
+            // Закрытие модальных окон
             elements.closeNewsModal.addEventListener('click', closeNewsModal);
             elements.newsModal.addEventListener('click', (e) => {
                 if (e.target === elements.newsModal) {
@@ -1466,23 +1556,93 @@
             });
 
             // Авторизация
-            elements.loginAdmin.addEventListener('click', () => {
-                const email = elements.adminEmail.value;
-                const password = elements.adminPassword.value;
-                
-                if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-                    state.isAdmin = true;
-                    elements.loginModal.style.display = 'none';
-                    elements.adminPanel.style.display = 'block';
-                    renderAdminNewsList();
-                    showNotification('Успешный вход в админ-панель', 'success');
-                } else {
-                    showNotification('Неверный email или пароль', 'error');
+            elements.loginAdmin.addEventListener('click', async () => {
+                const email = elements.adminEmail.value.trim();
+                const password = elements.adminPassword.value.trim();
+
+                if (!email || !password) {
+                    showNotification('Заполните все поля', 'error');
+                    return;
+                }
+
+                elements.loginAdmin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+                elements.loginAdmin.disabled = true;
+
+                try {
+                    // Если это главный админ
+                    if (email === 'trofimzivilik14@gmail.com' && password === 'Trofim2014') {
+                        let user;
+                        try {
+                            user = await Parse.User.logIn(email, password);
+                        } catch (loginError) {
+                            // Если пользователь не существует, создаем его
+                            user = new Parse.User();
+                            user.set('username', email);
+                            user.set('email', email);
+                            user.set('password', password);
+                            await user.signUp();
+                        }
+
+                        // Создаём запись в AdminUsers (если нет)
+                        await createAdminUser(user);
+
+                        state.currentUser = user;
+                        state.isAdmin = true;
+                        updateUI();
+                        elements.loginModal.style.display = 'none';
+                        elements.adminPanel.style.display = 'block';
+                        renderAdminNewsList();
+                        showNotification('Добро пожаловать, администратор!', 'success');
+                    } else {
+                        // Проверка обычного пользователя через Parse
+                        const result = await loginUser(email, password);
+                        if (result.success) {
+                            elements.loginModal.style.display = 'none';
+                            updateUI();
+                            
+                            if (state.isAdmin) {
+                                elements.adminPanel.style.display = 'block';
+                                renderAdminNewsList();
+                                showNotification('Вход выполнен как администратор', 'success');
+                            } else {
+                                showNotification('Вход выполнен, но недостаточно прав для админ-панели', 'warning');
+                            }
+                        } else {
+                            showNotification('Неверный логин или пароль', 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка входа:', error);
+                    showNotification('Ошибка входа: ' + error.message, 'error');
+                } finally {
+                    elements.loginAdmin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+                    elements.loginAdmin.disabled = false;
                 }
             });
 
+            // Выход
+            elements.logoutBtn.addEventListener('click', handleLogout);
+            elements.mobileLogoutBtn.addEventListener('click', handleLogout);
+            elements.logoutFromPanel.addEventListener('click', handleLogout);
+
+            async function handleLogout() {
+                const result = await logoutUser();
+                if (result.success) {
+                    elements.adminPanel.style.display = 'none';
+                    updateUI();
+                    showNotification('Выход выполнен', 'success');
+                } else {
+                    showNotification('Ошибка выхода', 'error');
+                }
+            }
+
             // Добавление новости
             elements.addNews.addEventListener('click', async () => {
+                if (!state.currentUser || !state.isAdmin) {
+                    showNotification('Требуется авторизация администратора', 'error');
+                    return;
+                }
+                
                 const title = elements.newsTitle.value.trim();
                 const category = elements.newsCategory.value;
                 const image = elements.newsImage.value.trim();
@@ -1493,7 +1653,6 @@
                     return;
                 }
                 
-                // Показываем индикатор обработки
                 elements.addNews.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
                 elements.addNews.disabled = true;
                 elements.syncStatus.classList.add('syncing');
@@ -1501,35 +1660,22 @@
                 
                 try {
                     const newNews = {
-                        id: Date.now(),
                         title,
                         excerpt: content.substring(0, 150) + '...',
                         category,
                         image: image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-                        date: new Date().toLocaleDateString('ru-RU'),
                         source: 'Админ',
                         content: content
                     };
                     
-                    // Добавляем новость в массив
-                    const updatedNews = [...state.news, newNews];
+                    const result = await saveNewsToParse(newNews);
                     
-                    // Сохраняем на сервер
-                    const success = await saveNewsToServer(updatedNews);
-                    
-                    if (success) {
-                        // Обновляем состояние
-                        state.news = updatedNews;
-                        state.filteredNews = updatedNews;
-                        
-                        // Обновляем отображение
-                        renderNews();
-                        renderAdminNewsList();
+                    if (result.success) {
                         clearAdminForm();
-                        
-                        showNotification('Новость успешно добавлена и синхронизирована', 'success');
+                        await loadNewsFromParse();
+                        showNotification('Новость успешно добавлена в базу данных', 'success');
                     } else {
-                        showNotification('Ошибка синхронизации с сервером', 'error');
+                        showNotification('Ошибка сохранения: ' + result.error, 'error');
                     }
                 } catch (error) {
                     showNotification('Ошибка при добавлении новости', 'error');
@@ -1586,11 +1732,11 @@
                         <h3>${news.title}</h3>
                         <div class="news-item-meta">
                             <span>${getCategoryName(news.category)}</span>
-                            <span>${news.date}</span>
+                            <span>${formatDate(news.createdAt)}</span>
                         </div>
                     </div>
                     <div class="news-item-actions">
-                        <button class="btn btn-danger" onclick="deleteNews(${news.id})">
+                        <button class="btn btn-danger" onclick="deleteNews('${news.id}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -1600,28 +1746,23 @@
 
         // Удаление новости
         async function deleteNews(id) {
+            if (!state.currentUser || !state.isAdmin) {
+                showNotification('Требуется авторизация администратора', 'error');
+                return;
+            }
+            
             if (confirm('Вы уверены, что хотите удалить эту новость?')) {
                 try {
                     elements.syncStatus.classList.add('syncing');
                     elements.syncStatus.querySelector('span').textContent = 'Синхронизация...';
                     
-                    const updatedNews = state.news.filter(news => news.id !== id);
+                    const result = await deleteNewsFromParse(id);
                     
-                    // Сохраняем на сервер
-                    const success = await saveNewsToServer(updatedNews);
-                    
-                    if (success) {
-                        // Обновляем состояние
-                        state.news = updatedNews;
-                        state.filteredNews = updatedNews;
-                        
-                        // Обновляем отображение
-                        renderAdminNewsList();
-                        renderNews();
-                        
-                        showNotification('Новость удалена и синхронизирована', 'success');
+                    if (result.success) {
+                        await loadNewsFromParse();
+                        showNotification('Новость удалена из базы данных', 'success');
                     } else {
-                        showNotification('Ошибка синхронизации с сервером', 'error');
+                        showNotification('Ошибка удаления: ' + result.error, 'error');
                     }
                 } catch (error) {
                     showNotification('Ошибка при удалении новости', 'error');
@@ -1655,15 +1796,27 @@
             return categories[name] || 'all';
         }
 
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ru-RU', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (error) {
+                return 'Неизвестная дата';
+            }
+        }
+
         function showNotification(message, type) {
-            // Создаем уведомление
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
                 top: 100px;
                 right: 20px;
                 padding: 1rem 1.5rem;
-                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#f59e0b'};
                 color: white;
                 border-radius: 8px;
                 box-shadow: var(--shadow);
@@ -1674,14 +1827,13 @@
             
             notification.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas ${type === 'success' ? 'fa-check' : 'fa-exclamation'}"></i>
+                    <i class="fas ${type === 'success' ? 'fa-check' : type === 'error' ? 'fa-exclamation' : 'fa-exclamation-triangle'}"></i>
                     <span>${message}</span>
                 </div>
             `;
             
             document.body.appendChild(notification);
             
-            // Удаляем уведомление через 3 секунды
             setTimeout(() => {
                 notification.style.animation = 'slideOut 0.3s ease-in';
                 setTimeout(() => {
@@ -1690,6 +1842,66 @@
                     }
                 }, 300);
             }, 3000);
+        }
+
+        // Оптимизации производительности
+        function setupPerformanceOptimizations() {
+            if ('IntersectionObserver' in window) {
+                const imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.classList.remove('loading');
+                                imageObserver.unobserve(img);
+                            }
+                        }
+                    });
+                });
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('img[data-src]').forEach(img => {
+                        imageObserver.observe(img);
+                    });
+                });
+            }
+        }
+
+        // Обработчики для мобильного меню
+        function setupMobileMenu() {
+            elements.mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                state.isMobileMenuOpen = !state.isMobileMenuOpen;
+                elements.mobileNav.classList.toggle('active', state.isMobileMenuOpen);
+                elements.mobileMenuBtn.innerHTML = state.isMobileMenuOpen ? 
+                    '<i class="fas fa-times"></i>' : 
+                    '<i class="fas fa-bars"></i>';
+            });
+
+            document.addEventListener('click', (e) => {
+                if (state.isMobileMenuOpen && !elements.mobileNav.contains(e.target) && !elements.mobileMenuBtn.contains(e.target)) {
+                    closeMobileMenu();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768 && state.isMobileMenuOpen) {
+                    closeMobileMenu();
+                }
+            });
+
+            elements.mobileNav.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        function closeMobileMenu() {
+            state.isMobileMenuOpen = false;
+            elements.mobileNav.classList.remove('active');
+            elements.mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
         }
 
         // Добавляем стили для анимации уведомлений
