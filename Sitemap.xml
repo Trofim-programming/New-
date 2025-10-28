@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    
+    <!-- Главная страница -->
+    <url>
+        <loc>https://novosti-plus.ru/</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://novosti-plus.ru/"/>
+    </url>
+    
+    <!-- Виртуальные URL для разделов SPA -->
+    <url>
+        <loc>https://novosti-plus.ru/#vse-novosti</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#izbrannoe</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#politika</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#ekonomika</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#tekhnologii</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#sport</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#kultura</loc>
+        <lastmod>2023-12-01</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+</urlset>
