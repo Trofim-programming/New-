@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <!-- Canonical URL -->
+<link rel="canonical" href="https://novosti-plus.ru/" />
+
+<!-- Open Graph метатеги -->
+<meta property="og:title" content="Новости+ - Современные новости онлайн" />
+<meta property="og:description" content="Самые свежие и интересные новости, обработанные нейросетью для лучшего восприятия" />
+<meta property="og:url" content="https://novosti-plus.ru/" />
+<meta property="og:site_name" content="Новости+" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ru_RU" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Новости+ - Современные новости онлайн" />
+<meta name="twitter:description" content="Самые свежие и интересные новости, обработанные нейросетью для лучшего восприятия" />
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsMediaOrganization",
+  "name": "Новости+",
+  "url": "https://novosti-plus.ru/",
+  "logo": "https://novosti-plus.ru/logo.png",
+  "description": "Современные новости онлайн - самые свежие и интересные новости",
+  "sameAs": [
+    "https://t.me/plus_novosty"
+  ]
+}
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Современные новости онлайн - самые свежие и интересные новости">
@@ -1235,15 +1265,14 @@
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <p>© 2025 Новости+. Все права защищены.</p>
+            <p>© 2023 Новости+. Все права защищены.</p>
             <p>Современная платформа для чтения новостей</p>
             <div class="contacts">
                 <p>Свяжитесь с нами: <a href="https://t.me/plus_novosty" target="_blank">@plus_novosty</a></p>
             </div>
         </div>
     </footer>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1861780787527911"
-     crossorigin="anonymous"></script>
+
     <script>
         // Конфигурация Back4App Parse
         Parse.initialize("TllBpzRUnfTo6IhOW6oGUrQ2ubiUyWS555vExzuu", "p4oPbVYAEVdGSXvt0A8zCxakmOH0zxgHYezNatyp");
@@ -1260,8 +1289,6 @@
             currentUser: null
         };
 
-        
-        
         // DOM элементы
         const elements = {
             newsGrid: document.getElementById('newsGrid'),
@@ -2038,6 +2065,81 @@
 
         // Делаем функции глобальными для использования в inline обработчиках
         window.deleteNews = deleteNews;
+
+        // Функция для обновления sitemap при добавлении новостей
+async function updateSitemap() {
+    try {
+        const News = Parse.Object.extend('News');
+        const query = new Parse.Query(News);
+        query.descending('createdAt');
+        query.limit(1000);
+        
+        const news = await query.find();
+        
+        let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    
+    <url>
+        <loc>https://novosti-plus.ru/</loc>
+        <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://novosti-plus.ru/"/>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#vse-novosti</loc>
+        <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <url>
+        <loc>https://novosti-plus.ru/#izbrannoe</loc>
+        <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>`;
+        
+        // Добавляем категории
+        const categories = ['politika', 'ekonomika', 'tekhnologii', 'sport', 'kultura'];
+        categories.forEach(category => {
+            sitemapContent += `
+    <url>
+        <loc>https://novosti-plus.ru/#${category}</loc>
+        <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.8</priority>
+    </url>`;
+        });
+        
+        // Добавляем отдельные новости (первые 100 для примера)
+        news.slice(0, 100).forEach(item => {
+            const newsDate = new Date(item.get('createdAt')).toISOString().split('T')[0];
+            sitemapContent += `
+    <url>
+        <loc>https://novosti-plus.ru/#novost/${item.id}</loc>
+        <lastmod>${newsDate}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>`;
+        });
+        
+        sitemapContent += '\n</urlset>';
+        
+        // Здесь можно отправить sitemap на сервер
+        console.log('Sitemap content generated');
+        return sitemapContent;
+        
+    } catch (error) {
+        console.error('Error generating sitemap:', error);
+    }
+}
+
+// Вызывать при изменении новостей
+// updateSitemap();
     </script>
+    
 </body>
 </html>
